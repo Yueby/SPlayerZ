@@ -5,14 +5,9 @@
 
 const fastify = require('fastify');
 const NeteaseCloudMusicApi = require('@neteasecloudmusicapienhanced/api');
-const fs = require('fs');
-const path = require('path');
 
 const BASE_PORT = 36524;
 const MAX_PORT_ATTEMPTS = 10;
-
-// 端口信息文件路径
-const PORT_INFO_FILE = path.join(__dirname, '.api-port.json');
 
 async function findAvailablePort(startPort) {
   for (let i = 0; i < MAX_PORT_ATTEMPTS; i++) {
@@ -39,9 +34,6 @@ async function startServer() {
   // 查找可用端口
   const port = await findAvailablePort(BASE_PORT);
   console.log(`🔍 Found available port: ${port}`);
-  
-  // 保存端口信息到文件
-  fs.writeFileSync(PORT_INFO_FILE, JSON.stringify({ port, timestamp: Date.now() }));
   
   const server = fastify({ 
     logger: false,
@@ -108,10 +100,6 @@ async function startServer() {
     console.log(`✅ Registered ${routeCount} API routes`);
   } catch (error) {
     console.error('❌ Failed to start API server:', error);
-    // 删除端口信息文件
-    if (fs.existsSync(PORT_INFO_FILE)) {
-      fs.unlinkSync(PORT_INFO_FILE);
-    }
     process.exit(1);
   }
   
@@ -119,17 +107,11 @@ async function startServer() {
   const cleanup = async () => {
     console.log('🛑 Shutting down API server...');
     await server.close();
-    // 删除端口信息文件
-    if (fs.existsSync(PORT_INFO_FILE)) {
-      fs.unlinkSync(PORT_INFO_FILE);
-    }
     process.exit(0);
   };
   
   process.on('SIGINT', cleanup);
   process.on('SIGTERM', cleanup);
-  
-  return port;
 }
 
 startServer().catch(error => {
