@@ -33,8 +33,8 @@ async function startServer() {
   Object.entries(NeteaseCloudMusicApi).forEach(([name, handler]) => {
     if (typeof handler !== 'function') return;
     
-    // 转换驼峰命名为斜杠路径：playlistDetail -> /playlist/detail
-    const route = '/' + name.replace(/([A-Z])/g, '/$1').toLowerCase().replace(/^\//, '');
+    // 转换下划线命名为斜杠路径：login_status -> /login/status
+    const route = '/' + name.replace(/_/g, '/');
     
     const handleRequest = async (req, reply) => {
       try {
